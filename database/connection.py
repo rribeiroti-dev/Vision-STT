@@ -6,7 +6,15 @@ if not DATABASE_URL:
     logger.error("DATABASE_URL não configurada nas variáveis de ambiente.")
     raise ValueError("DATABASE_URL não informada.")
 
-# Configuração Híbrida Inteligente
+# --- CORREÇÃO AUTOMÁTICA PARA O RENDER ---
+# Se o Render/Neon enviar como 'postgres://', corrige para o padrão moderno do SQLAlchemy 2
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg://", 1)
+elif DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg://", 1)
+# ------------------------------------------
+
+# Configuração Híbrida Inteligente (Não mude, ela funciona sozinha!)
 if DATABASE_URL.startswith("sqlite"):
     # Configuração específica e leve para o SQLite Local
     engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
