@@ -14,7 +14,46 @@ Aplicações Web nativa desenvolvida em Python de alto desempenho para ingestão
 * **Clean Architecture:** Separação estrita em camadas: Configuração, Modelos, Repositórios, Serviços, Controladores e Views.
 * **Princípios SOLID:** Baixíssimo acoplamento entre a interface do Streamlit e as regras estruturais de visão computacional.
 * **Injeção de Dependências:** O gerenciamento de sessões do banco de dados é tratado através de geradores reutilizáveis nativos.
+---
 
+## 🚀 Funcionalidades Principais
+
+* **📸 Captura e Análise de Imagem:** Integração nativa com a webcam para capturar fotos, processando métricas de luminosidade, grau de nitidez, paleta de cores média (RGB) e detecção de rostos via Classificadores Haar Cascade.
+* **🎤 Transcrição de Áudio em PT-BR (100% Gratuita):** Captura de observações por voz diretamente do microfone com processamento e transcrição nativa em Português do Brasil usando a API pública do Google (*SpeechRecognition*), sem custos ou chaves de API.
+* **🔥 Fluxo Unificado Inteligente:** Captura de imagem e gravação de áudio feitas de forma sequencial na interface, acionando ambos os pipelines com um único clique operacional.
+* **💾 Banco de Dados Híbrido:** Suporte automático e transparente para **SQLite** (ambiente de desenvolvimento local) e **PostgreSQL / Neon.tech** (ambiente de produção na nuvem).
+* **📊 Histórico Dinâmico:** Visualização completa e filtrada de registros passados, com gráficos de métricas e exibição de imagens salvas.
+
+---
+
+## 🛠️ Arquitetura de Pastas do Projeto
+
+O ecossistema segue o padrão arquitetural MVC adaptado para microsserviços em engenharia de dados:
+
+```text
+📂 computer-vision-streamlit/
+├── 📂 assets/              # Armazenamento local de mídias (fotos salvas)
+│   └── 📂 images/
+├── 📂 config/              # Centralização de configurações globais do app
+│   └── settings.py
+├── 📂 controllers/         # Orquestração de fluxo entre views e serviços
+│   └── main_controller.py
+├── 📂 database/            # Conexão, sessão e ciclo de vida do SQLAlchemy
+│   └── connection.py
+├── 📂 models/              # Mapeamento ORM/Tabelas relacionais
+│   └── analise.py
+├── 📂 repositories/        # Camada de abstração e consultas ao banco (CRUD)
+│   └── analise_repository.py
+├── 📂 services/            # Lógica pura de visão computacional e áudio
+│   ├── cv_service.py
+│   └── stt_service.py
+├── 📂 utils/               # Inicializadores de banco e utilitários
+│   └── db_init.py
+├── .env                    # Variáveis de ambiente locais (Ignorado pelo Git)
+├── .env.example            # Modelo de configuração para novos ambientes
+├── .gitignore              # Proteção de credenciais e cache
+├── app.py                  # Ponto de entrada (Interface Visual Streamlit)
+└── requirements.txt        # Gerenciamento de dependências otimizado
 ---
 
 ## 🛠️ Instalação e Execução Local
