@@ -46,34 +46,26 @@ with tab_captura:
     with col_input:
         st.subheader("📡 Entrada de Dispositivos")
         
-        # 1. Seção da Câmera
-        st.markdown("### 📸 Captura de Imagem")
+        # Ambas as capturas ficam disponíveis sequencialmente na mesma coluna
+        st.markdown("### 📸 1. Captura de Imagem")
         camera_file = st.camera_input("Alinhar webcam para captura")
         
         st.markdown("---")
         
-        # 2. Seção do Microfone (Totalmente Separada)
-        st.markdown("### 🎤 Observações em Áudio (Speech to Text)")
+        st.markdown("### 🎤 2. Observações em Áudio (PT-BR)")
         audio_recorded = audio_recorder()
-        
         if audio_recorded:
             st.audio(audio_recorded, format="audio/wav")
-            # Botão exclusivo para processar APENAS o áudio se o usuário quiser
-            if st.button("🗣️ Transcrever Apenas Áudio", use_container_width=True):
-                with st.spinner("Transcrevendo áudio..."):
-                    texto_transcrito = controller.stt_service.transcrever(audio_recorded)
-                    st.info(f"✨ **Resultado da Transcrição:** {texto_transcrito}")
 
     with col_output:
         st.subheader("🖥️ Resultados e Ações")
         
-        # Se houver imagem capturada, mostra o preview na direita
         if camera_file is not None:
             st.image(camera_file, caption="Frame Capturado", use_container_width=True)
             
-            # Botão principal que processa a imagem (e junta o áudio se ele existir)
+            # Botão Único que dispara o processamento em conjunto
             if st.button("🔥 Executar Análise Completa (Imagem + Áudio)", use_container_width=True):
-                with st.spinner("Executando pipelines de processamento interno..."):
+                with st.spinner("Executando pipelines de visão e áudio gratuito..."):
                     try:
                         img_bytes = camera_file.getvalue()
                         aud_bytes = audio_recorded if audio_recorded else None
@@ -82,7 +74,6 @@ with tab_captura:
                         
                         st.success("🎉 Processamento Concluído e Persistido!")
                         
-                        # Exibição das Métricas Visuais
                         st.markdown(f"### 📊 Resultados do ID #{resultado.id}")
                         st.write(f"**Descrição:** {resultado.descricao}")
                         st.write(f"**Objetos Encontrados:** {resultado.objetos}")
@@ -92,12 +83,14 @@ with tab_captura:
                         st.write(f"**Paleta de Cores (RGB Médio):** {resultado.cores}")
                         
                         if resultado.transcricao:
-                            st.info(f"🗣️ **Transcrição Vinculada:** {resultado.transcricao}")
+                            st.info(f"🗣️ **Transcrição Gravada (PT-BR):** {resultado.transcricao}")
+                        else:
+                            st.warning("🗣️ Nenhum áudio enviado ou processado para esta análise.")
                             
                     except Exception as e:
                         st.error(f"Falha operacional no processamento: {str(e)}")
         else:
-            st.info("Aguardando captura ativa de imagem pela webcam para habilitar análise visual.")
+            st.info("Por favor, capture uma imagem pela webcam para habilitar o botão de análise conjunta.")
 
 with tab_historico:
     st.subheader("🗂️ Repositório e Histórico das Análises")
