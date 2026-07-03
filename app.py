@@ -192,28 +192,51 @@ with tab_historico:
         st.info("Nenhum registro localizado para os filtros informados.")
 
 with tab_dashboard:
-    st.subheader("📈 Painel Executivo e Analytics")
-    
-    db_session = next(get_db())
-    repo_dash = AnaliseRepository(db_session)
-    todos = repo_dash.find_all()
-    
-    if todos:
-        import pandas as pd
-        df = pd.DataFrame([{
-            "id": t.id,
-            "pessoas": t.quantidade_pessoas,
-            "data": t.created_at.date()
-        } for t in todos])
+    st.subheader("📊 Painel Analítico e Métricas do Sistema")
+
+    # 1. Busca os registros atualizados do banco através do repositório
+    db_context = next(get_db())
+    repository = AnaliseRepository(db_context)
+    todos_registros = repository.get_all()
+
+    if todos_registros:
+        # Converter os objetos do banco em um DataFrame do Pandas para os gráficos
+        dados_lista = []
+        for reg in todos_registros:
+            dados_lista.append({
+                "ID": reg.id,
+                "Rostos": reg.rostos if reg.rostos is not None else 0,
+                "Luminosidade": reg.luminosidade if reg.luminosidade is not None else 0.0,
+                "Nitidez": reg.nitidez if reg.nitidez is not None else 0.0,
+                "Quantidade Pessoas": reg.quantidade_pessoas if reg.quantidade_pessoas is not None else 0
+            })
         
-        m_totais, m_pessoas = st.columns(2)
-        with m_totais:
+        df = pd.DataFrame(dados_lista)
+
+        # 2. Exibição dos Indicadores (Cards)
+        col_m1, col_m2, col_m3 = st.columns(3)
+        with col_m1:
             st.metric(label="Total de Análises Executadas", value=len(df))
-        with m_pessoas:
-            st.metric(label="Total de Rostos Identificados", value=int(df["pessoas"].sum()))
-            
-        st.markdown("#### Volume Operacional Diário")
-        chart_data = df.groupby("data").size().reset_index(name="Quantidade de Capturas")
-        st.line_chart(chart_data.set_index("data"))
+        with col_m2:
+            st.metric(label="Total de Rostos Identificados", value=int(df["Rostos"].sum()))
+        with col_m3:
+            st.metric(label="Média de Nitidez das Capturas", value=f"{df['Nitidez'].mean():.2f}")
+
+        st.markdown("---")
+
+        # 3. Geração dos Gráficos Visuais
+        col_g1, col_g2 = st.columns(2)
+
+        with col_g1:
+            st.markdown("### 📈 Tendência de Rostos Detectados por ID")
+            # Gráfico de barras nativo do Streamlit mapeando os Rostos por ID de análise
+            st.bar_chart(data=df, x="ID", y="Rostos", color="#262730")
+
+        with col_g2:
+            st.markdown("### 🧪 Níveis de Luminosidade vs Nitidez")
+            # Gráfico de linha comparando as métricas de qualidade de imagem
+            st.line_chart(data=df, x="ID", y=["Luminosidade", "Nitidez"])
+
     else:
-        st.info("Dados analíticos indisponíveis devido à ausência de registros no banco.")
+        # Estado amigável caso o banco de dados esteja limpo
+        st.info("Ainda não existem análises processadas no banco de dados para gerar gráficos estatísticos.")
