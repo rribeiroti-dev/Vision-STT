@@ -32,7 +32,8 @@ Duplique o arquivo `.env.example` e renomeie-o para `.env`. Preencha com suas cr
 ```env
 DATABASE_URL=postgresql+psycopg://usuario:senha@ep-nome-banco.us-east-1.aws.neon.tech/dbname?sslmode=require
 UPLOAD_FOLDER=assets/images
-SECRET_KEY=suachavesecretaperfeita
+PYTHON_VERSION=3.12.8
+
 ```
 
 ### 3. Inicialização da Aplicação
