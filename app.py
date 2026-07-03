@@ -43,19 +43,42 @@ tab_captura, tab_historico, tab_dashboard = st.tabs(["📸 Captura e Processamen
 with tab_captura:
     col_input, col_output = st.columns(2)
 
+    # Inicializa variáveis de estado para o controle do áudio se não existirem
+    if "audio_bytes_gravado" not in st.session_state:
+        st.session_state.audio_bytes_gravado = None
+    if "reset_gravador_key" not in st.session_state:
+        st.session_state.reset_gravador_key = 0
+
     with col_input:
         st.subheader("📡 Entrada de Dispositivos")
         
-        # Ambas as capturas ficam disponíveis sequencialmente na mesma coluna
         st.markdown("### 📸 1. Captura de Imagem")
-        camera_file = st.camera_input("Alinhar webcam para captura")
+        # Adicionamos uma chave para monitorar o estado da câmera
+        camera_file = st.camera_input("Alinhar webcam para captura", key="webcam_principal")
         
+        # --- LÓGICA DE LIMPEZA DO ÁUDIO ---
+        # Se a câmera foi limpa (ou seja, o usuário clicou em 'Clear photo'),
+        # nós limpamos o áudio do estado da sessão e forçamos o componente a resetar
+        if camera_file is None and st.session_state.audio_bytes_gravado is not None:
+            st.session_state.audio_bytes_gravado = None
+            st.session_state.reset_gravador_key += 1  # Muda a key para forçar o redesenho do gravador
+            st.rerun()
+        # ----------------------------------
+
         st.markdown("---")
         
         st.markdown("### 🎤 2. Observações em Áudio (PT-BR)")
-        audio_recorded = audio_recorder()
+        
+        # O gravador usa uma key dinâmica. Quando mudamos o número da key, o Streamlit limpa o áudio antigo.
+        audio_recorded = audio_recorder(key=f"gravador_audio_{st.session_state.reset_gravador_key}")
+        
+        # Se um novo áudio for gravado, atualiza o estado
         if audio_recorded:
-            st.audio(audio_recorded, format="audio/wav")
+            st.session_state.audio_bytes_gravado = audio_recorded
+
+        # Exibe o player de áudio se houver algo gravado
+        if st.session_state.audio_bytes_gravado:
+            st.audio(st.session_state.audio_bytes_gravado, format="audio/wav")
 
     with col_output:
         st.subheader("🖥️ Resultados e Ações")
@@ -63,12 +86,12 @@ with tab_captura:
         if camera_file is not None:
             st.image(camera_file, caption="Frame Capturado", use_container_width=True)
             
-            # Botão Único que dispara o processamento em conjunto
             if st.button("🔥 Executar Análise Completa (Imagem + Áudio)", use_container_width=True):
                 with st.spinner("Executando pipelines de visão e áudio gratuito..."):
                     try:
                         img_bytes = camera_file.getvalue()
-                        aud_bytes = audio_recorded if audio_recorded else None
+                        # Usa o áudio sincronizado do session_state
+                        aud_bytes = st.session_state.audio_bytes_gravado
                         
                         resultado = controller.processar_fluxo_completo(img_bytes, aud_bytes)
                         
