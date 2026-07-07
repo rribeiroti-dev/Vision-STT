@@ -195,9 +195,9 @@ with tab_dashboard:
     st.subheader("📊 Painel Analítico e Métricas do Sistema")
 
     # 1. Busca os registros atualizados do banco através do repositório
-db_context = next(get_db())
-repository = AnaliseRepository(db_context)
-todos_registros = repository.find_all() # <-- ALTERADO PARA FIND_ALL
+        db_context = next(get_db())
+        repository = AnaliseRepository(db_context)
+        todos_registros = repository.find_all() # <-- ALTERADO PARA FIND_ALL
 
     if todos_registros:
         # Converter os objetos do banco em um DataFrame do Pandas para os gráficos
