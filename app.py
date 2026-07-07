@@ -213,6 +213,13 @@ with tab_dashboard:
         
         df = pd.DataFrame(dados_lista)
 
+        # Força a conversão das colunas métricas para números (corrige o erro de string)
+        df["Nitidez"] = pd.to_numeric(df["Nitidez"], errors='coerce').fillna(0.0)
+        df["Luminosidade"] = pd.to_numeric(df["Luminosidade"], errors='coerce').fillna(0.0)
+        df["Rostos"] = pd.to_numeric(df["Rostos"], errors='coerce').fillna(0).astype(int)
+
+        # 2. Exibição dos Indicadores (Cards)
+
         # 2. Exibição dos Indicadores (Cards)
         col_m1, col_m2, col_m3 = st.columns(3)
         with col_m1:
